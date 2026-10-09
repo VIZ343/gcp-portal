@@ -11,12 +11,14 @@ Base limpia y modular del portal GCP, desarrollada con apoyo de distintas herram
 GCP_Portal_Base/
 ├─ index.html                    # Home
 ├─ assets/
-│  └─ modelo-central/            # Siluetas utilizadas por el modelo central
+│  ├─ modelo-central/            # Siluetas utilizadas por el modelo central
+│  └─ vendor/                    # Dependencias locales y licencias MIT
 ├─ css/
 │  ├─ background.css             # Apariencia del background técnico compartido
 │  ├─ home.css                   # Home: modelo, logo, dock y UI
 │  └─ secciones.css              # Layout común de secciones
 ├─ js/
+│  ├─ boot.js                    # Carga y recuperación del modelo central
 │  ├─ background.js              # Generación/animación del background compartido
 │  ├─ home.js                    # Logo + interacción dock de Home
 │  └─ modelo-central.js          # Escena Three.js y transiciones del modelo central
@@ -32,15 +34,15 @@ GCP_Portal_Base/
 - Home conserva logo animado, dock inferior y modelo central.
 - El background técnico se comparte entre Home y todas las secciones.
 - Las secciones son independientes y por ahora solo contienen título + regreso a Home.
-- Modelo central: 52K micro-esferas y flujo `ESFERA → 00_E_2 → 01_E_2 → ARQ_E`.
+- Modelo central: 52K micro-esferas en escritorio (24K en móviles o equipos de hasta 4 hilos) y flujo `ESFERA → 00_E_2 → 01_E_2 → ARQ_E`.
 - No requiere npm ni build.
 
 ## Ejecutar
 Abrir con Live Server desde la carpeta `GCP_Portal_Base`.
 
-## Dependencias externas actuales
-- Three.js 0.178.0 desde jsDelivr.
-- Anime.js desde jsDelivr.
+## Dependencias
+- Three.js 0.178.0 local en `assets/vendor/` (misma versión del modelo original).
+- Anime.js 4.5.0 local en `assets/vendor/` (versión fijada).
 - Google Fonts: Cormorant Garamond y Montserrat.
 
 ## Regla de integración
@@ -61,3 +63,15 @@ Todas las rutas internas deben ser **relativas** (sin `/` inicial), porque el si
 - Mantener las rutas relativas.
 - Devolver el archivo completo modificado e indicar qué líneas cambiaron.
 - Hacer un solo cambio por solicitud.
+
+## Versión depurada V0.1.1
+- Carga del modelo con recuperación ante errores de WebGL y recursos; navegación siempre disponible.
+- Portada visible al regresar mediante el historial del navegador.
+- Render y generación del fondo suspendidos al ocultar la pestaña.
+- Preferencia de movimiento reducido respetada en el modelo, fondo y logo.
+- Límites de partículas y resolución en equipos modestos; se mantiene la secuencia original.
+- Zoom del navegador con Ctrl/Meta + rueda conservado y controles con foco visible.
+- Sin instalación de paquetes: abrir `index.html` con Live Server desde la raíz del repositorio.
+
+Validación: sintaxis JavaScript, rutas locales y regresión del retorno a Home comprobadas.
+Pendiente: revisión visual de animaciones y rendimiento en navegador real.

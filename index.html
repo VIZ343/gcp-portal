@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="description" content="GCP Portal: proyectos, capacidades, empresa y contacto." />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GCP Portal — Home</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -75,7 +76,7 @@
     </nav>
 
     <div class="ui">
-      <div class="status" id="status">ESFERA</div>
+      <div class="status" id="status" role="status" aria-live="polite">ESFERA</div>
       <div class="scroll-hint" id="scrollHint">SCROLL ↓</div>
     </div>
 
@@ -86,7 +87,7 @@
   </main>
 
   <script type="module" src="./js/background.js"></script>
-  <script type="module" src="./js/modelo-central.js"></script>
+  <script type="module" src="./js/boot.js"></script>
   <script src="./js/home.js"></script>
 </body>
 </html>

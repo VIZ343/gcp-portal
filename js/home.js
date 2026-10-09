@@ -7,11 +7,13 @@
   const INTRO_MS = 1900;
   const LOOP_EVERY_MS = 30000;
   const LOOP_MS = 2900;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let started = false;
   let intervalId = null;
   let loopTimeoutId = null;
 
   function runLoop() {
+    if(document.hidden || reduceMotion)return;
     logo.classList.remove('brand-loop');
     void logo.getBoundingClientRect();
     logo.classList.add('brand-loop');
@@ -22,6 +24,7 @@
   function start() {
     if (started) return;
     started = true;
+    if(reduceMotion){logo.classList.add('brand-ready');return;}
     logo.classList.add('brand-intro');
 
     setTimeout(() => {
@@ -43,6 +46,7 @@
   const dock = document.getElementById('homeDock');
   if (!dock) return;
 
+  window.addEventListener('pageshow', () => document.body.classList.remove('nav-leave'));
   const items = [...dock.querySelectorAll('.dock-item')];
   const dividers = [...dock.querySelectorAll('.dock-divider')];
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
