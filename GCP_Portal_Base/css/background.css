@@ -1,0 +1,84 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #4d6579;
+  --ink-soft: #718698;
+  --ui-ink: #173552;
+}
+
+html, body, #app, #stage {
+  width: 100%;
+  height: 100%;
+}
+
+html, body {
+  overflow: hidden;
+  background: #ffffff;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ui-ink);
+}
+
+/* =========================================================
+   BACKGROUND — BASE ESTABLE
+   ========================================================= */
+
+#background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(231,237,242,0.16), rgba(255,255,255,0) 31%),
+    radial-gradient(circle at 82% 72%, rgba(236,240,244,0.14), rgba(255,255,255,0) 28%),
+    radial-gradient(circle at 12% 74%, rgba(238,242,245,0.11), rgba(255,255,255,0) 26%),
+    linear-gradient(180deg, #fcfdfe 0%, #ffffff 45%, #fefefe 100%);
+}
+
+.atmosphere {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(80px);
+  pointer-events: none;
+  will-change: transform, opacity;
+  mix-blend-mode: multiply;
+}
+
+.atmosphere-a { width: 520px; height: 320px; left: 8%; top: 8%; background: rgba(220,228,234,0.16); opacity: 0.50; }
+.atmosphere-b { width: 690px; height: 400px; right: 1%; top: 26%; background: rgba(227,233,238,0.14); opacity: 0.44; }
+.atmosphere-c { width: 470px; height: 300px; left: 37%; bottom: -4%; background: rgba(232,237,241,0.14); opacity: 0.36; }
+.atmosphere-d { width: 300px; height: 220px; right: 28%; top: 5%; background: rgba(240,243,246,0.12); opacity: 0.30; }
+
+#technical-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+#base-layer { opacity: 0.20; }
+#generated-layer { opacity: 0.72; }
+#reveal-layer { opacity: 0.95; }
+
+.technical-line, .technical-light, .technical-dashed, .axis, .cross, .node, .technical-text, .technical-number {
+  vector-effect: non-scaling-stroke;
+}
+
+.technical-line { fill: none; stroke: var(--ink); stroke-width: 0.62; opacity: 0.24; }
+.technical-light { fill: none; stroke: var(--ink-soft); stroke-width: 0.48; opacity: 0.14; }
+.technical-dashed { fill: none; stroke: var(--ink-soft); stroke-width: 0.52; stroke-dasharray: 8 8; opacity: 0.14; }
+.axis { fill: none; stroke: var(--ink); stroke-width: 0.56; opacity: 0.15; }
+.cross { stroke: var(--ink); stroke-width: 0.52; opacity: 0.18; }
+.node { fill: var(--ink); opacity: 0.20; }
+.technical-text { fill: var(--ink); font-size: 10px; letter-spacing: 1.8px; opacity: 0.20; }
+.technical-number { fill: var(--ink); font-size: 8px; letter-spacing: 1.25px; opacity: 0.18; }
+
+.depth-near { opacity: 0.72; filter: blur(0px); }
+.depth-mid { opacity: 0.44; filter: blur(0.15px); }
+.depth-far { opacity: 0.22; filter: blur(0.35px); }
+.draw-path { stroke-linecap: round; stroke-linejoin: round; }

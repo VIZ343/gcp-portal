@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GCP Portal — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/background.css" />
+  <link rel="stylesheet" href="./css/home.css" />
+</head>
+<body>
+  <div id="background" data-gcp-background aria-hidden="true"></div>
+
+  <main id="app">
+    <div id="stage"></div>
+
+    <div class="brand-lockup" aria-label="GCP Portal — Proyectos que impulsan territorios">
+      <svg id="brandLogo" class="brand-logo" viewBox="0 0 760 210" role="img" aria-hidden="true">
+        <defs>
+          <linearGradient id="brandPieceLight" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#9aa8b9" />
+            <stop offset="100%" stop-color="#71829a" />
+          </linearGradient>
+          <linearGradient id="brandPieceDark" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#50637b" />
+            <stop offset="100%" stop-color="#2f4159" />
+          </linearGradient>
+          <linearGradient id="brandLineGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#98a7b7" />
+            <stop offset="100%" stop-color="#62778f" />
+          </linearGradient>
+        </defs>
+        <g class="brand-mark" transform="translate(6 4)">
+          <g class="brand-lines" stroke="url(#brandLineGrad)" stroke-width="3" stroke-linecap="round" fill="none">
+            <path class="brand-line brand-v" d="M92 4 L92 176" pathLength="1" />
+            <path class="brand-line brand-h" d="M0 92 L177 92" pathLength="1" />
+            <path class="brand-line brand-d" d="M36 149 L143 42" pathLength="1" />
+            <path class="brand-line brand-s" d="M119 76 L145 50" pathLength="1" />
+          </g>
+          <g class="brand-pieces" transform="translate(92 92)">
+            <polygon class="brand-piece brand-tl" points="0,0 -31,0 -31,-31 0,-31" fill="url(#brandPieceDark)" />
+            <polygon class="brand-piece brand-tr" points="0,0 24,-24 24,0 0,0" fill="url(#brandPieceLight)" />
+            <polygon class="brand-piece brand-bl" points="0,0 -24,24 -24,0 0,0" fill="url(#brandPieceLight)" />
+            <polygon class="brand-piece brand-br" points="0,0 31,0 31,31 0,31" fill="url(#brandPieceDark)" />
+          </g>
+          <circle class="brand-center" cx="92" cy="92" r="4" fill="#41546d" />
+          <circle class="brand-ring" cx="92" cy="92" r="14" fill="none" stroke="#8fa0b3" stroke-width="1.2" />
+        </g>
+        <g class="brand-wording" transform="translate(184 18)">
+          <text class="brand-title" x="0" y="69">GCP Portal</text>
+          <text class="brand-subtitle" x="3" y="111">PROYECTOS QUE IMPULSAN</text>
+          <text class="brand-subtitle" x="3" y="139">TERRITORIOS</text>
+        </g>
+      </svg>
+    </div>
+
+    <nav class="home-dock" id="homeDock" aria-label="Accesos principales">
+      <a class="dock-item" href="./secciones/proyectos/">
+        <span class="dock-label">PROYECTOS</span><span class="dock-index">01</span>
+      </a>
+      <span class="dock-divider" aria-hidden="true"></span>
+      <a class="dock-item" href="./secciones/capacidades/">
+        <span class="dock-label">CAPACIDADES</span><span class="dock-index">02</span>
+      </a>
+      <span class="dock-divider" aria-hidden="true"></span>
+      <a class="dock-item" href="./secciones/empresa/">
+        <span class="dock-label">EMPRESA</span><span class="dock-index">03</span>
+      </a>
+      <span class="dock-divider" aria-hidden="true"></span>
+      <a class="dock-item" href="./secciones/contacto/">
+        <span class="dock-label">CONTACTO</span><span class="dock-index">04</span>
+      </a>
+    </nav>
+
+    <div class="ui">
+      <div class="status" id="status">ESFERA</div>
+      <div class="scroll-hint" id="scrollHint">SCROLL ↓</div>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="loading__line"></div>
+      <span>PREPARANDO MODELO CENTRAL</span>
+    </div>
+  </main>
+
+  <script type="module" src="./js/background.js"></script>
+  <script type="module" src="./js/modelo-central.js"></script>
+  <script src="./js/home.js"></script>
+</body>
+</html>
