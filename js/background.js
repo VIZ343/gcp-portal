@@ -1,4 +1,4 @@
-import { animate, stagger } from "https://cdn.jsdelivr.net/npm/animejs/+esm";
+import { animate, stagger } from "../assets/vendor/anime.esm.js";
 
 const backgroundHost = document.querySelector('[data-gcp-background]');
 
@@ -55,6 +55,7 @@ const revealLayer = document.querySelector("#reveal-layer");
 const revealCircle = document.querySelector("#revealCircle");
 const NS = "http://www.w3.org/2000/svg";
 
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CONFIG = {
   maxActive: 16,
   spawnMin: 220,
@@ -65,11 +66,14 @@ const CONFIG = {
   centerSafeZone: { x1: 540, x2: 1060, y1: 270, y2: 630 }
 };
 
+if (!reduceMotion) {
 animate(".atmosphere-a", { x: [0, 34, -8, 0], y: [0, -16, 8, 0], opacity: [0.36, 0.54, 0.42, 0.36], duration: 22000, loop: true, ease: "inOutSine" });
 animate(".atmosphere-b", { x: [0, -42, 16, 0], y: [0, 18, -8, 0], opacity: [0.30, 0.46, 0.34, 0.30], duration: 27000, loop: true, ease: "inOutSine" });
 animate(".atmosphere-c", { x: [0, 24, -10, 0], y: [0, -12, 6, 0], opacity: [0.24, 0.38, 0.28, 0.24], duration: 25000, loop: true, ease: "inOutSine" });
 animate(".atmosphere-d", { x: [0, -16, 12, 0], y: [0, 10, -5, 0], opacity: [0.18, 0.28, 0.22, 0.18], duration: 19000, loop: true, ease: "inOutSine" });
 animate(".base-drift", { opacity: [0.08, 0.16, 0.08], duration: 12000, delay: stagger(900), loop: true, alternate: true, ease: "inOutSine" });
+
+}
 
 function rand(min, max) { return Math.random() * (max - min) + min; }
 function choice(items) { return items[Math.floor(Math.random() * items.length)]; }
@@ -228,16 +232,18 @@ const generators = [
 
 function activeCount() { return generatedLayer.children.length; }
 function spawn() {
-  if (activeCount() < CONFIG.maxActive) {
+  if (!document.hidden && activeCount() < CONFIG.maxActive) {
     choice(generators)();
     if (Math.random() > 0.58 && activeCount() < CONFIG.maxActive) {
-      setTimeout(() => choice(generators)(), rand(60,180));
+      setTimeout(() => { if (!document.hidden && activeCount() < CONFIG.maxActive) choice(generators)(); }, rand(60,180));
     }
   }
   setTimeout(spawn, rand(CONFIG.spawnMin, CONFIG.spawnMax));
 }
+if (!reduceMotion) {
 for (let i = 0; i < 8; i++) setTimeout(() => choice(generators)(), i * 220);
 setTimeout(spawn, 600);
+}
 
 let mouseX = 800, mouseY = 450, currentX = 800, currentY = 450;
 let targetRadius = 0, currentRadius = 0;
@@ -247,7 +253,8 @@ function pointerToSVG(event) {
   const point = svg.createSVGPoint();
   point.x = event.clientX;
   point.y = event.clientY;
-  return point.matrixTransform(svg.getScreenCTM().inverse());
+  const matrix = svg.getScreenCTM();
+  return matrix ? point.matrixTransform(matrix.inverse()) : point;
 }
 
 window.addEventListener("pointermove", event => {
@@ -265,7 +272,10 @@ document.documentElement.addEventListener("pointerleave", () => {
   targetParallaxY = 0;
 });
 
+let frameId = null;
 function updateFrame() {
+  frameId = null;
+  if (document.hidden || reduceMotion) return;
   currentX += (mouseX - currentX) * 0.075;
   currentY += (mouseY - currentY) * 0.075;
   currentRadius += (targetRadius - currentRadius) * 0.055;
@@ -276,6 +286,10 @@ function updateFrame() {
   revealCircle.setAttribute("r", currentRadius);
   generatedLayer.setAttribute("transform", `translate(${parallaxX * 0.55} ${parallaxY * 0.55})`);
   revealLayer.setAttribute("transform", `translate(${parallaxX} ${parallaxY})`);
-  requestAnimationFrame(updateFrame);
+  frameId = requestAnimationFrame(updateFrame);
 }
 updateFrame();
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){cancelAnimationFrame(frameId);frameId=null;}
+  else if(frameId === null)updateFrame();
+});

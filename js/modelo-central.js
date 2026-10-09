@@ -1,12 +1,15 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.178.0/build/three.module.js';
+import * as THREE from '../assets/vendor/three.module.js';
 
 const stage = document.querySelector('#stage');
 const loading = document.querySelector('#loading');
 const statusEl = document.querySelector('#status');
 const scrollHint = document.querySelector('#scrollHint');
 
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const compactDevice = window.matchMedia('(max-width: 760px)').matches || (navigator.hardwareConcurrency || 8) <= 4;
+const pixelRatioLimit = compactDevice ? 1.5 : 2;
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, pixelRatioLimit));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.setClearColor(0xffffff, 0);
@@ -29,13 +32,13 @@ const STATES = [
 ];
 
 // MODELO CENTRAL — configuración estable de Home.
-const INSTANCE_COUNT = 52000;
+const INSTANCE_COUNT = compactDevice ? 24000 : 52000;
 const SPHERE_DETAIL = 1;
 const BASE_RADIUS = 0.015;
 
 const TARGET_BOX_W = 8.25;
 const TARGET_BOX_H = 5.35;
-const TRANSITION_MS = 3400;
+const TRANSITION_MS = reduceMotion ? 0 : 3400;
 const WHEEL_THRESHOLD = 48;
 
 let particles = null;
@@ -52,6 +55,7 @@ function clamp01(v) { return clamp(v, 0, 1); }
 function easeInOutCubic(t) { t = clamp01(t); return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
 function tween({duration, update}) {
   return new Promise(resolve => {
+    if (duration === 0) { update(1); resolve(); return; }
     const start = performance.now();
     function frame(now) {
       const t = clamp01((now-start)/duration);
@@ -65,8 +69,9 @@ function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = reject;
+    const timeout = setTimeout(() => reject(new Error(`Tiempo de carga agotado: ${url}`)), 15000);
+    img.onload = () => { clearTimeout(timeout); resolve(img); };
+    img.onerror = () => { clearTimeout(timeout); reject(new Error(`No se pudo cargar: ${url}`)); };
     img.src = url;
   });
 }
@@ -234,7 +239,7 @@ function createParticles(targets) {
         float bloom=sin(fract(uStage)*3.14159265);
         center+=normalize(center+vec3(0.001))*bloom*(0.035+iRandom*0.055);
         vec4 centerView=modelViewMatrix*vec4(center,1.0); vec4 centerClip=projectionMatrix*centerView; vec2 centerNDC=centerClip.xy/max(centerClip.w,0.0001);
-        float influence=smoothstep(0.28,0.0,distance(centerNDC,uPointer))*uPointerStrength;
+        float influence=(1.0-smoothstep(0.0,0.28,distance(centerNDC,uPointer)))*uPointerStrength;
         float angle=atan(centerNDC.y-uPointer.y,centerNDC.x-uPointer.x)+1.5707963;
         center.xy+=vec2(cos(angle),sin(angle))*(0.018+iRandom*0.024)*influence;
         center.z+=sin(uTime*3.5+iRandom*21.0)*0.035*influence;
@@ -294,18 +299,21 @@ async function transitionToStage(nextStage) {
   currentStage=nextStage;
   transitionBusy=false;
   updateStatus();
+  if(reduceMotion)render();
 }
 function requestStep(direction){if(!transitionBusy)transitionToStage(currentStage+direction);}
 
 window.addEventListener('wheel',event=>{
+  if(event.ctrlKey || event.metaKey)return;
   event.preventDefault();
   if(transitionBusy)return;
-  wheelAccumulator+=event.deltaY;
+  wheelAccumulator+=event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
   if(Math.abs(wheelAccumulator)>=WHEEL_THRESHOLD){requestStep(wheelAccumulator>0?1:-1);wheelAccumulator=0;}
 },{passive:false});
 window.addEventListener('keydown',event=>{
-  if(event.key==='ArrowDown'||event.key==='PageDown')requestStep(1);
-  if(event.key==='ArrowUp'||event.key==='PageUp')requestStep(-1);
+  if(event.target.closest('input, textarea, select, [contenteditable]'))return;
+  if(event.key==='ArrowDown'||event.key==='PageDown'){event.preventDefault();requestStep(1);}
+  if(event.key==='ArrowUp'||event.key==='PageUp'){event.preventDefault();requestStep(-1);}
 });
 window.addEventListener('touchstart',event=>{touchStartY=event.touches[0]?.clientY??null;},{passive:true});
 window.addEventListener('touchend',event=>{
@@ -319,18 +327,19 @@ window.addEventListener('pointermove',event=>{
   pointerTX=(event.clientX/window.innerWidth-0.5)*2;
   pointerTY=(event.clientY/window.innerHeight-0.5)*2;
 });
-window.addEventListener('pointerleave',()=>{pointerInside=false;pointerTX=0;pointerTY=0;});
+document.documentElement.addEventListener('pointerleave',()=>{pointerInside=false;pointerTX=0;pointerTY=0;});
 window.addEventListener('resize',()=>{
   camera.aspect=window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,pixelRatioLimit));
   renderer.setSize(window.innerWidth,window.innerHeight);
   fitModelToViewport();
+  if(reduceMotion)render();
 });
 
 async function init() {
   const images=await Promise.all(STATES.slice(1).map(state=>loadImage(state.url)));
-  loading.querySelector('span').textContent='GENERANDO 52K MICRO-ESFERAS';
+  loading.querySelector('span').textContent=`GENERANDO ${INSTANCE_COUNT / 1000}K MICRO-ESFERAS`;
   const targets=images.map((img,index)=>buildTargetFromImage(img,index+1));
   createParticles(targets);
   fitModelToViewport();
@@ -340,9 +349,13 @@ async function init() {
   window.dispatchEvent(new CustomEvent('gcp:central-ready'));
 }
 
+let frameId = null;
+let contextLost = false;
 function render() {
-  requestAnimationFrame(render);
-  const time=clock.getElapsedTime();
+  frameId = null;
+  if(document.hidden || contextLost)return;
+  if(!reduceMotion)frameId = requestAnimationFrame(render);
+  const time=reduceMotion ? 0 : clock.getElapsedTime();
   pointerX+=(pointerTX-pointerX)*0.05;
   pointerY+=(pointerTY-pointerY)*0.05;
   if(particleMaterial) {
@@ -364,9 +377,19 @@ function render() {
   renderer.render(scene,camera);
 }
 
-render();
-init().catch(error=>{
-  console.error(error);
-  statusEl.textContent='ERROR DE CARGA';
-  loading.querySelector('span').textContent='NO SE PUDO PREPARAR EL ELEMENTO CENTRAL';
+function resumeRender() {
+  if(frameId === null && !document.hidden && !contextLost)render();
+}
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){cancelAnimationFrame(frameId);frameId=null;}else resumeRender();
 });
+renderer.domElement.addEventListener('webglcontextlost', event => {
+  event.preventDefault(); contextLost=true; cancelAnimationFrame(frameId);frameId=null;
+  statusEl.textContent='VISUALIZACIÓN PAUSADA';
+});
+renderer.domElement.addEventListener('webglcontextrestored', () => {contextLost=false;updateStatus();resumeRender();});
+
+export async function initializeCentral() {
+  await init();
+  resumeRender();
+}
