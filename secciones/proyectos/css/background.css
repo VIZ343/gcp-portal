@@ -1,0 +1,27 @@
+/* GCP Portal V0.2 — background GCP basado en el repositorio, con mayor presencia.
+   Fuente verificada: css/background.css @ 312589359bd88d5bfa4545da859a254e02f65235
+   Conserva geometria, capas y colores; ajusta densidad, visibilidad y frecuencia.
+*/
+:root{--ink:#4d6579;--ink-soft:#718698;--ui-ink:#173552}
+#background{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:
+ radial-gradient(circle at 50% 45%,rgba(231,237,242,.16),transparent 31%),
+ radial-gradient(circle at 82% 72%,rgba(236,240,244,.14),transparent 28%),
+ radial-gradient(circle at 12% 74%,rgba(238,242,245,.11),transparent 26%),
+ linear-gradient(180deg,#fcfdfe 0%,#fff 45%,#fefefe 100%)}
+.atmosphere{position:absolute;border-radius:999px;filter:blur(80px);pointer-events:none;will-change:transform,opacity;mix-blend-mode:multiply}
+.atmosphere-a{width:520px;height:320px;left:8%;top:8%;background:rgba(220,228,234,.16);opacity:.50}
+.atmosphere-b{width:690px;height:400px;right:1%;top:26%;background:rgba(227,233,238,.14);opacity:.44}
+.atmosphere-c{width:470px;height:300px;left:37%;bottom:-4%;background:rgba(232,237,241,.14);opacity:.36}
+.atmosphere-d{width:300px;height:220px;right:28%;top:5%;background:rgba(240,243,246,.12);opacity:.30}
+#technical-svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+#base-layer{opacity:.34}#generated-layer{opacity:.94}#reveal-layer{opacity:1}
+.technical-line,.technical-light,.technical-dashed,.axis,.cross,.node,.technical-text,.technical-number{vector-effect:non-scaling-stroke}
+.technical-line{fill:none;stroke:var(--ink);stroke-width:.88;opacity:.63}
+.technical-light{fill:none;stroke:var(--ink-soft);stroke-width:.76;opacity:.47}
+.technical-dashed{fill:none;stroke:var(--ink-soft);stroke-width:.52;stroke-dasharray:8 8;opacity:.45}
+.axis{fill:none;stroke:var(--ink);stroke-width:.73;opacity:.48}
+.cross{stroke:var(--ink);stroke-width:.78;opacity:.50}.node{fill:var(--ink);opacity:.40}
+.technical-text{fill:var(--ink);font-size:10px;letter-spacing:1.8px;opacity:.40}
+.technical-number{fill:var(--ink);font-size:8px;letter-spacing:1.25px;opacity:.57}
+.depth-near{opacity:.95;filter:blur(0)}.depth-mid{opacity:.76;filter:blur(.15px)}.depth-far{opacity:.54;filter:blur(.35px)}
+.draw-path{stroke-linecap:round;stroke-linejoin:round}
