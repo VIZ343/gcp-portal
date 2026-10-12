@@ -1,22 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="description" content="GCP Portal: proyectos, capacidades, empresa y contacto." />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GCP Portal — PROYECTOS</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="GCP Portal — Proyectos que impulsan territorios. Catálogo de proyectos Industrial y Hábitat." />
+  <title>GCP Portal — Proyectos</title>
+  <link rel="preconnect" href="https://static.wixstatic.com" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../../css/background.css" />
-  <link rel="stylesheet" href="../../css/secciones.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/background.css" />
+  <link rel="stylesheet" href="./css/portal.css" />
 </head>
 <body>
+  <!-- El mismo host de background del GCP Portal. El fondo técnico de GCP es una adaptación local con mayor densidad y visibilidad. -->
   <div id="background" data-gcp-background aria-hidden="true"></div>
-  <main class="section-shell">
-    <h1 class="section-title">PROYECTOS</h1>
-    <a class="home-button" href="../../index.html"><span class="home-arrow">←</span><span>HOME</span></a>
-  </main>
-  <script type="module" src="../../js/background.js"></script>
+
+  <div id="app">
+    <header class="site-header" aria-label="Encabezado GCP Portal">
+      <a class="brand" href="#inicio" aria-label="GCP Portal, inicio de catálogo">
+        <svg class="brand-icon" viewBox="0 0 155 160" aria-hidden="true">
+          <defs>
+            <linearGradient id="iconlight" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#9aa8b9"/><stop offset="1" stop-color="#71829a"/></linearGradient>
+            <linearGradient id="icondark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#50637b"/><stop offset="1" stop-color="#2f4159"/></linearGradient>
+          </defs>
+          <g stroke="#7a8fa4" stroke-width="1.65" fill="none"><path d="M77 2V150M3 78H151M30 124L122 32"/></g>
+          <g transform="translate(77 78)"><polygon points="0,0 -24,0 -24,-24 0,-24" fill="url(#icondark)"/><polygon points="0,0 20,-20 20,0" fill="url(#iconlight)"/><polygon points="0,0 -20,20 -20,0" fill="url(#iconlight)"/><polygon points="0,0 24,0 24,24" fill="url(#icondark)"/></g>
+          <circle cx="77" cy="78" r="2.7" fill="#41546d"/>
+        </svg>
+        <span class="brand-words">
+          <span class="brand-name">GCP Portal</span>
+          <span class="brand-tagline">PROYECTOS QUE IMPULSAN<br/>TERRITORIOS</span>
+        </span>
+      </a>
+
+      <div class="header-divider" aria-hidden="true"></div>
+      <div class="section-title-group">
+        <h1>PROYECTOS</h1>
+        <nav class="section-nav" aria-label="Categorías de proyectos">
+          <button class="section-tab is-active" data-section="industrial" type="button" aria-pressed="true">INDUSTRIAL</button>
+          <span class="nav-slash" aria-hidden="true">/</span>
+          <button class="section-tab" data-section="habitat" type="button" aria-pressed="false">HÁBITAT</button>
+          <span class="nav-spacer" aria-hidden="true"></span>
+          <span class="nav-slash nav-home-slash" aria-hidden="true">/</span>
+          <a class="nav-home" href="../../index.html" title="Volver a Home de GCP Portal">HOME</a>
+        </nav>
+      </div>
+      <div class="feature-indicator" aria-live="polite"><span id="project-count" class="feature-number">09</span><span class="feature-label">PROYECTOS<br/>DESTACADOS</span><span class="feature-arrow" aria-hidden="true">↗</span></div>
+    </header>
+
+    <main id="inicio" class="main-stage">
+      <div class="gallery-topline" aria-hidden="true"><span>PORTAFOLIO / 01</span><span>ESPACIO · ARQUITECTURA · CONSTRUCCIÓN</span></div>
+      <div id="gallery-scroll" class="gallery-scroll" tabindex="0" role="region" aria-label="Galería espacial de proyectos">
+        <div class="gallery-world" id="gallery-world">
+          <div id="gallery-grid" class="gallery-grid" aria-live="polite"></div>
+          <div class="gallery-ending"><span class="ending-mark">GCP</span><span>PROYECTOS QUE IMPULSAN TERRITORIOS</span></div>
+        </div>
+      </div>
+      <div class="stage-bottom" aria-hidden="true">
+        <span><i class="indicator-pulse"></i>CATÁLOGO / VISTA ESPACIAL</span>
+        <span class="scroll-instruction">DESPLAZA PARA EXPLORAR <span>↓</span></span>
+        <span id="gallery-progress" class="gallery-progress">01 — 03</span>
+      </div>
+    </main>
+  </div>
+
+  <dialog class="project-dialog" id="project-dialog" aria-label="Detalle del proyecto">
+    <button type="button" id="detail-close" class="dialog-close" aria-label="Cerrar vista de proyecto">×</button>
+    <div class="dialog-body" id="dialog-body"></div>
+  </dialog>
+
+  <script type="module" src="./js/background-fallback.js"></script>
+  <script type="module" src="./js/app.js"></script>
 </body>
 </html>
