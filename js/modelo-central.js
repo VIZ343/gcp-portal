@@ -39,7 +39,7 @@ const BASE_RADIUS = 0.015;
 const TARGET_BOX_W = 8.25;
 const TARGET_BOX_H = 5.35;
 const TRANSITION_MS = reduceMotion ? 0 : 3400;
-const PHASE_INTERVAL_MS = 7000;
+const PHASE_INTERVAL_MS = 5000;
 
 let particles = null;
 let particleMaterial = null;
@@ -285,7 +285,7 @@ function fitModelToViewport() {
 }
 function updateStatus() {
   statusEl.textContent=STATES[currentStage].name;
-  scrollHint.textContent='CICLO AUTOMÁTICO · 7 S';
+  scrollHint.textContent='CICLO AUTOMÁTICO · 5 S';
 }
 async function transitionToStage(nextStage) {
   nextStage=clamp(nextStage,0,STATES.length-1);
