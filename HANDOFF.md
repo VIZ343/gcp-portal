@@ -51,3 +51,10 @@ Continuar funciones o contenido por módulo sin alterar la base completa cuando 
 - Mantener todas las rutas relativas para funcionar bajo /gcp-portal/.
 - Las secciones siguen siendo placeholders; añadir contenido por módulo.
 - Google Fonts es opcional y conserva fuentes alternativas.
+
+## Ciclo automático del modelo central
+- PHASE_INTERVAL_MS = 5000 en js/modelo-central.js: inicia un cambio cada 5 s de pestaña activa, con la transición existente de 3400 ms incluida en ese intervalo.
+- Secuencia: ESFERA → 00_E_2 → 01_E_2 → ARQ_E → ESFERA; el shader añade un tramo directo ARQ_E → ESFERA.
+- Sustituye los controles manuales de rueda, teclado y swipe; se conserva la reacción visual al puntero.
+- Comienza tras cargar el modelo; se pausa al ocultar/salir de la página o perder WebGL. Al volver, espera 5 s sin acumular cambios ni duplicar temporizadores.
+- Movimiento reducido conserva transiciones instantáneas y render bajo demanda.

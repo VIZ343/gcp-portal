@@ -39,14 +39,14 @@ const BASE_RADIUS = 0.015;
 const TARGET_BOX_W = 8.25;
 const TARGET_BOX_H = 5.35;
 const TRANSITION_MS = reduceMotion ? 0 : 3400;
-const WHEEL_THRESHOLD = 48;
+const PHASE_INTERVAL_MS = 5000;
 
 let particles = null;
 let particleMaterial = null;
 let currentStage = 0;
 let transitionBusy = false;
-let wheelAccumulator = 0;
-let touchStartY = null;
+let cycleTimerId = null;
+let pageSuspended = false;
 let pointerInside = false;
 let pointerX = 0, pointerY = 0, pointerTX = 0, pointerTY = 0;
 
@@ -222,13 +222,14 @@ function createParticles(targets) {
       vec3 hsl2rgb(vec3 hsl){vec3 rgb=hue2rgb(hsl.x);float c=(1.0-abs(2.0*hsl.z-1.0))*hsl.y;return (rgb-0.5)*c+hsl.z;}
       void main(){
         vec3 center; vec3 color; float localT;
-        float sphereMix=1.0-smoothstep(0.0,1.0,uStage);
+        float sphereMix=uStage<3.0?1.0-smoothstep(0.0,1.0,uStage):smoothstep(3.0,4.0,uStage);
         float hue=fract(0.54+iRandom*0.34+iSphere.y*0.06+sin(uTime*0.12+iRandom*16.0)*0.045);
         vec3 sphereColor=hsl2rgb(vec3(hue,0.76,0.62));
         if(uStage<1.0){localT=ease(uStage);center=mix(iSphere,iTarget0,localT);color=mix(sphereColor,iColor0,localT);}
         else if(uStage<2.0){localT=ease(uStage-1.0);center=mix(iTarget0,iTarget1,localT);color=mix(iColor0,iColor1,localT);}
-        else{localT=ease(uStage-2.0);center=mix(iTarget1,iTarget2,localT);color=mix(iColor1,iColor2,localT);}
-        float formed=smoothstep(0.08,0.75,min(uStage,1.0));
+        else if(uStage<3.0){localT=ease(uStage-2.0);center=mix(iTarget1,iTarget2,localT);color=mix(iColor1,iColor2,localT);}
+        else{localT=ease(uStage-3.0);center=mix(iTarget2,iSphere,localT);color=mix(iColor2,sphereColor,localT);}
+        float formed=smoothstep(0.08,0.75,uStage<3.0?min(uStage,1.0):4.0-uStage);
         vec3 radial=normalize(iSphere+vec3(0.001));
         float sphereWave=sin(iSphere.x*2.8+iSphere.y*1.7+uTime*1.55+iRandom*13.0)*0.055+cos(iSphere.z*3.1-iSphere.y*2.0-uTime*1.15+iRandom*9.0)*0.038;
         center+=radial*sphereWave*sphereMix;
@@ -284,44 +285,37 @@ function fitModelToViewport() {
 }
 function updateStatus() {
   statusEl.textContent=STATES[currentStage].name;
-  if(currentStage===0) scrollHint.textContent='SCROLL ↓';
-  else if(currentStage===STATES.length-1) scrollHint.textContent='SCROLL ↑';
-  else scrollHint.textContent='SCROLL ↓ / ↑';
+  scrollHint.textContent='CICLO AUTOMÁTICO · 5 S';
 }
 async function transitionToStage(nextStage) {
   nextStage=clamp(nextStage,0,STATES.length-1);
   if(transitionBusy||nextStage===currentStage||!particleMaterial)return;
   transitionBusy=true;
-  const from=particleMaterial.uniforms.uStage.value, to=nextStage;
+  const from=particleMaterial.uniforms.uStage.value;
+  // El tramo 3 → 4 del shader vuelve directamente de ARQ_E a ESFERA.
+  const to=nextStage===0 && currentStage===STATES.length-1 ? STATES.length : nextStage;
   statusEl.textContent=`${STATES[currentStage].name} → ${STATES[nextStage].name}`;
   await tween({duration:TRANSITION_MS,update:raw=>{particleMaterial.uniforms.uStage.value=THREE.MathUtils.lerp(from,to,easeInOutCubic(raw));}});
-  particleMaterial.uniforms.uStage.value=to;
+  particleMaterial.uniforms.uStage.value=nextStage;
   currentStage=nextStage;
   transitionBusy=false;
   updateStatus();
   if(reduceMotion)render();
 }
-function requestStep(direction){if(!transitionBusy)transitionToStage(currentStage+direction);}
+function stopAutoCycle() {
+  clearTimeout(cycleTimerId);
+  cycleTimerId=null;
+}
+function scheduleAutoCycle() {
+  stopAutoCycle();
+  if(!particleMaterial || document.hidden || contextLost || pageSuspended)return;
+  cycleTimerId=setTimeout(()=>{
+    cycleTimerId=null;
+    if(!transitionBusy)void transitionToStage((currentStage+1)%STATES.length);
+    scheduleAutoCycle();
+  },PHASE_INTERVAL_MS);
+}
 
-window.addEventListener('wheel',event=>{
-  if(event.ctrlKey || event.metaKey)return;
-  event.preventDefault();
-  if(transitionBusy)return;
-  wheelAccumulator+=event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
-  if(Math.abs(wheelAccumulator)>=WHEEL_THRESHOLD){requestStep(wheelAccumulator>0?1:-1);wheelAccumulator=0;}
-},{passive:false});
-window.addEventListener('keydown',event=>{
-  if(event.target.closest('input, textarea, select, [contenteditable]'))return;
-  if(event.key==='ArrowDown'||event.key==='PageDown'){event.preventDefault();requestStep(1);}
-  if(event.key==='ArrowUp'||event.key==='PageUp'){event.preventDefault();requestStep(-1);}
-});
-window.addEventListener('touchstart',event=>{touchStartY=event.touches[0]?.clientY??null;},{passive:true});
-window.addEventListener('touchend',event=>{
-  if(touchStartY==null)return;
-  const endY=event.changedTouches[0]?.clientY??touchStartY;
-  const delta=touchStartY-endY; touchStartY=null;
-  if(Math.abs(delta)>42)requestStep(delta>0?1:-1);
-},{passive:true});
 window.addEventListener('pointermove',event=>{
   pointerInside=true;
   pointerTX=(event.clientX/window.innerWidth-0.5)*2;
@@ -364,14 +358,14 @@ function render() {
     const target=pointerInside?1:0;
     particleMaterial.uniforms.uPointerStrength.value+=(target-particleMaterial.uniforms.uPointerStrength.value)*0.08;
     const stageValue=particleMaterial.uniforms.uStage.value;
-    const formed=clamp01(stageValue/0.85);
+    const formed=clamp01((stageValue<3?stageValue:4-stageValue)/0.85);
     const formedWeight=formed*formed*(3-2*formed);
     root.rotation.y=pointerX*0.055*formedWeight;
     root.rotation.x=-pointerY*0.028*formedWeight;
     // Mantener el modelo centrado; el cursor conserva solo una rotacion sutil.
     root.position.x=0;
     root.position.y=0;
-    if(stageValue<0.08){root.rotation.y=time*0.095;root.rotation.x=Math.sin(time*0.21)*0.045;}
+    if(stageValue<0.08 || stageValue>3.92){root.rotation.y=time*0.095;root.rotation.x=Math.sin(time*0.21)*0.045;}
   }
   camera.lookAt(baseTarget);
   renderer.render(scene,camera);
@@ -381,15 +375,21 @@ function resumeRender() {
   if(frameId === null && !document.hidden && !contextLost)render();
 }
 document.addEventListener('visibilitychange', () => {
-  if(document.hidden){cancelAnimationFrame(frameId);frameId=null;}else resumeRender();
+  if(document.hidden){cancelAnimationFrame(frameId);frameId=null;stopAutoCycle();}
+  else{resumeRender();scheduleAutoCycle();}
 });
 renderer.domElement.addEventListener('webglcontextlost', event => {
   event.preventDefault(); contextLost=true; cancelAnimationFrame(frameId);frameId=null;
+  stopAutoCycle();
   statusEl.textContent='VISUALIZACIÓN PAUSADA';
 });
-renderer.domElement.addEventListener('webglcontextrestored', () => {contextLost=false;updateStatus();resumeRender();});
+renderer.domElement.addEventListener('webglcontextrestored', () => {contextLost=false;updateStatus();resumeRender();scheduleAutoCycle();});
+
+window.addEventListener('pagehide',()=>{pageSuspended=true;stopAutoCycle();});
+window.addEventListener('pageshow',()=>{pageSuspended=false;scheduleAutoCycle();});
 
 export async function initializeCentral() {
   await init();
   resumeRender();
+  scheduleAutoCycle();
 }
